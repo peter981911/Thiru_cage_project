@@ -1,37 +1,47 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
 
 :root {
-  /* Ultra-Premium Color Palette */
-  --color-bg: #FCFBF9;          /* Alabaster white */
-  --color-surface: #FFFFFF;     /* Pure white */
-  --color-primary: #0B241C;     /* Very deep luxurious green */
-  --color-secondary: #D4AF37;   /* Vibrant metallic gold */
-  --color-text-main: #1A1A1A;   /* Near black for crisp contrast */
-  --color-text-light: #666666;  /* Soft grey */
-  --color-wood: #4A3320;        /* Deep rich mahogany */
-  --color-accent-glow: rgba(212, 175, 55, 0.15); /* Gold glow */
-  
+  /* Warm Luxury Wood & Botanical Palette */
+  --color-bg: #FCFBF9;
+  --color-surface: #FFFFFF;
+  --color-surface-warm: #F5F1E9;
+  --color-primary: #0B241C;
+  --color-primary-soft: #173D30;
+  --color-secondary: #D4AF37;
+  --color-secondary-dark: #B59024;
+  --color-text-main: #1A1A1A;
+  --color-text-light: #5C5C5C;
+  --color-wood: #4A3320;
+  --color-border: #E8E3D9;
+  --color-whatsapp: #1D9B52;
+  --color-accent-glow: rgba(212, 175, 55, 0.15);
+
   /* Typography */
   --font-display: 'Playfair Display', serif;
   --font-body: 'Outfit', sans-serif;
-  
+
   /* Layout */
-  --container-max: 1200px;
-  --section-padding: 8rem 2rem;
-  --radius-sm: 8px;
+  --container-max: 1240px;
+  --section-padding: 5.5rem 0;
+  --radius-sm: 10px;
   --radius-md: 16px;
   --radius-lg: 24px;
-  
-  /* Transitions */
-  --transition-smooth: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  --shadow-subtle: 0 10px 40px rgba(0,0,0,0.04);
-  --shadow-hover: 0 25px 50px rgba(11, 36, 28, 0.15);
+
+  /* Transitions & Shadows */
+  --transition-smooth: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-subtle: 0 10px 35px rgba(11, 36, 28, 0.05);
+  --shadow-hover: 0 22px 45px rgba(11, 36, 28, 0.12);
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 90px;
 }
 
 body {
@@ -59,15 +69,19 @@ ul {
   list-style: none;
 }
 
+button {
+  font-family: var(--font-body);
+}
+
 .container {
   max-width: var(--container-max);
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 1.75rem;
 }
 
 @media (max-width: 768px) {
   .container {
-    padding: 0 1rem;
+    padding: 0 1.1rem;
   }
 }
 
@@ -77,11 +91,10 @@ ul {
   justify-content: center;
   background-color: var(--color-primary);
   color: var(--color-bg);
-  padding: 1rem 2rem;
-  font-family: var(--font-body);
-  font-size: 1rem;
+  padding: 0.9rem 1.75rem;
+  font-size: 0.98rem;
   font-weight: 500;
-  border: none;
+  border: 1px solid var(--color-primary);
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: var(--transition-smooth);
@@ -89,7 +102,8 @@ ul {
 }
 
 .btn-primary:hover {
-  background-color: var(--color-secondary);
+  background-color: var(--color-secondary-dark);
+  border-color: var(--color-secondary-dark);
   transform: translateY(-2px);
 }
 
@@ -99,9 +113,8 @@ ul {
   justify-content: center;
   background-color: transparent;
   color: var(--color-primary);
-  padding: 1rem 2rem;
-  font-family: var(--font-body);
-  font-size: 1rem;
+  padding: 0.9rem 1.65rem;
+  font-size: 0.98rem;
   font-weight: 500;
   border: 1px solid var(--color-primary);
   border-radius: var(--radius-sm);
@@ -115,27 +128,47 @@ ul {
   color: var(--color-bg);
 }
 
-/* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in {
-  animation: fadeIn 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.section-eyebrow {
+  display: inline-block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--color-secondary-dark);
+  margin-bottom: 0.65rem;
 }
 
 .section-title {
   text-align: center;
-  font-size: 3rem;
-  margin-bottom: 1rem;
+  font-size: 2.75rem;
+  margin-bottom: 0.85rem;
   color: var(--color-primary);
 }
 
 .section-subtitle {
   text-align: center;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   color: var(--color-text-light);
-  max-width: 600px;
-  margin: 0 auto 4rem;
+  max-width: 650px;
+  margin: 0 auto;
 }

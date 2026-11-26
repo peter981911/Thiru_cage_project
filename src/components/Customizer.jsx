@@ -1,43 +1,155 @@
 import { useState } from 'react';
-import { Settings, PenTool, Scaling, Send, Bird } from 'lucide-react';
+import { Settings, PenTool, Scaling, Send, Bird, Mail, Check, Layers } from 'lucide-react';
+import { buildMailtoUrl, buildWhatsAppUrl } from '../data/storeConfig';
+
+const BIRD_PRESETS = [
+  'Budgies',
+  'Lovebirds',
+  'Finches',
+  'Cockatiels',
+  'Sun Conure',
+  'Ringneck Parrot',
+];
+
+const ADDON_OPTIONS = [
+  'Pull-out Cleaning Tray',
+  'Wooden Nest Boxes',
+  'Clay Breeding Pots',
+  'Climbing Ladders & Swings',
+  'Center Partition Divider',
+  'Lockable Castor Wheels',
+];
+
+const SIZE_LABELS = {
+  compact: 'Compact Tabletop (e.g. 2 × 1.5 × 1.5 ft)',
+  medium: 'Medium Standing (e.g. 2 × 2 × 3 ft)',
+  duplex: 'Double-Tier / Duplex Breeding',
+  colony: 'Multi-Tier Colony Rack',
+  custom: 'Custom Dimensions',
+};
+
+const FINISH_LABELS = {
+  'clear-varnish': 'Natural Clear Wood Varnish',
+  'light-stain': 'Warm Honey Wood Stain',
+  'dark-walnut': 'Rich Walnut Wood Stain',
+  'yellow-trim': 'Signature Yellow Weather Trim',
+  unfinished: 'Raw Unfinished Natural Wood',
+};
 
 const Customizer = () => {
   const [formData, setFormData] = useState({
     birdType: '',
     size: 'medium',
+    customDimensions: '',
     color: 'clear-varnish',
-    extras: ''
+    addons: ['Pull-out Cleaning Tray'],
+    extras: '',
   });
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setErrorMsg('');
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert('Thank you! Your custom cage quote request has been sent to our artisans.');
-    setFormData({ birdType: '', size: 'medium', color: 'clear-varnish', extras: '' });
+  const toggleAddon = (addon) => {
+    setFormData((prev) => {
+      const exists = prev.addons.includes(addon);
+      return {
+        ...prev,
+        addons: exists
+          ? prev.addons.filter((item) => item !== addon)
+          : [...prev.addons, addon],
+      };
+    });
   };
+
+  const selectBirdPreset = (bird) => {
+    setErrorMsg('');
+    setFormData((prev) => ({ ...prev, birdType: bird }));
+  };
+
+  const buildCustomMessage = () => {
+    const sizeText =
+      formData.size === 'custom' && formData.customDimensions.trim()
+        ? `Custom (${formData.customDimensions.trim()})`
+        : SIZE_LABELS[formData.size];
+
+    const addonsText = formData.addons.length > 0 ? formData.addons.join(', ') : 'Standard build';
+
+    return [
+      "Hi Thiru Cages! I'd like a quote for a custom wood-based bird cage:",
+      '',
+      `*Bird Species / Count:* ${formData.birdType}`,
+      `*Cage Layout / Size:* ${sizeText}`,
+      `*Wood Finish:* ${FINISH_LABELS[formData.color]}`,
+      `*Accessories:* ${addonsText}`,
+      `*Additional Notes:* ${formData.extras.trim() || 'None'}`,
+    ].join('\n');
+  };
+
+  const validateAndRun = (callback) => {
+    if (!formData.birdType.trim()) {
+      setErrorMsg('Please enter or select your bird species first.');
+      return;
+    }
+    callback();
+  };
+
+  const handleWhatsAppQuote = () => {
+    validateAndRun(() => {
+      window.open(buildWhatsAppUrl(buildCustomMessage()), '_blank', 'noopener,noreferrer');
+    });
+  };
+
+  const handleEmailQuote = () => {
+    validateAndRun(() => {
+      window.location.href = buildMailtoUrl(
+        `Custom Wooden Cage Quote - ${formData.birdType}`,
+        buildCustomMessage()
+      );
+    });
+  };
+
+  const displaySize =
+    formData.size === 'custom' && formData.customDimensions.trim()
+      ? `Custom (${formData.customDimensions.trim()})`
+      : SIZE_LABELS[formData.size];
 
   return (
     <section id="customizer" className="section customizer">
       <div className="container">
-        <h2 className="section-title">Design Your Masterpiece</h2>
-        <p className="section-subtitle">
-          Tell us about your feathered friend and your interior style.
-          Our artisans will craft a personalized quote for your dream aviary.
-        </p>
+        <div className="section-header">
+          <span className="section-eyebrow">Built to Your Exact Needs</span>
+          <h2 className="section-title">Design Your Custom Wooden Cage</h2>
+          <p className="section-subtitle">
+            Every bird and home is unique. Share your required dimensions, compartment layout,
+            and wood finish—we&apos;ll craft it directly at our Coimbatore workshop.
+          </p>
+        </div>
 
         <div className="customizer-layout">
-          <form className="customizer-form" onSubmit={handleSubmit}>
+          <form className="customizer-form" onSubmit={(e) => e.preventDefault()}>
             <div className="form-group">
-              <label htmlFor="birdType">Bird Species / Size</label>
+              <label htmlFor="birdType">Bird Species &amp; Number of Birds *</label>
+              <div className="preset-chips">
+                {BIRD_PRESETS.map((bird) => (
+                  <button
+                    key={bird}
+                    type="button"
+                    className={`preset-chip ${formData.birdType === bird ? 'active' : ''}`}
+                    onClick={() => selectBirdPreset(bird)}
+                  >
+                    {bird}
+                  </button>
+                ))}
+              </div>
               <input
                 type="text"
                 id="birdType"
                 name="birdType"
                 className="form-control"
-                placeholder="e.g., Macaw, Cockatiel, Finches"
+                placeholder="e.g., 2 Pairs of Lovebirds, Cockatiel, Finches"
                 value={formData.birdType}
                 onChange={handleChange}
                 required
@@ -45,86 +157,141 @@ const Customizer = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="size">Cage Size Preference</label>
-              <select name="size" id="size" className="form-control form-select" value={formData.size} onChange={handleChange}>
-                <option value="small">Small (Tabletop)</option>
-                <option value="medium">Medium (Freestanding)</option>
-                <option value="large">Large (Walk-in / Floor to Ceiling)</option>
+              <label htmlFor="size">Cage Layout / Size Preference</label>
+              <select
+                name="size"
+                id="size"
+                className="form-control form-select"
+                value={formData.size}
+                onChange={handleChange}
+              >
+                {Object.entries(SIZE_LABELS).map(([val, label]) => (
+                  <option key={val} value={val}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {formData.size === 'custom' && (
+              <div className="form-group">
+                <label htmlFor="customDimensions">Your Exact Dimensions (Width × Depth × Height)</label>
+                <input
+                  type="text"
+                  id="customDimensions"
+                  name="customDimensions"
+                  className="form-control"
+                  placeholder="e.g., 4 ft × 2 ft × 5 ft (or specify in inches)"
+                  value={formData.customDimensions}
+                  onChange={handleChange}
+                />
+              </div>
+            )}
+
+            <div className="form-group">
+              <label htmlFor="color">Wood Finish / Trim</label>
+              <select
+                name="color"
+                id="color"
+                className="form-control form-select"
+                value={formData.color}
+                onChange={handleChange}
+              >
+                {Object.entries(FINISH_LABELS).map(([val, label]) => (
+                  <option key={val} value={val}>
+                    {label}
+                  </option>
+                ))}
               </select>
             </div>
 
             <div className="form-group">
-              <label htmlFor="color">Finish / Color</label>
-              <select name="color" id="color" className="form-control form-select" value={formData.color} onChange={handleChange}>
-                <option value="clear-varnish">Clear Varnish (Natural Wood)</option>
-                <option value="light-stain">Light Wood Stain</option>
-                <option value="dark-walnut">Dark Walnut Stain</option>
-                <option value="unfinished">Unfinished (Raw Wood)</option>
-              </select>
+              <label>Included Wooden Add-Ons</label>
+              <div className="addon-grid">
+                {ADDON_OPTIONS.map((addon) => {
+                  const selected = formData.addons.includes(addon);
+                  return (
+                    <button
+                      key={addon}
+                      type="button"
+                      className={`addon-toggle ${selected ? 'selected' : ''}`}
+                      onClick={() => toggleAddon(addon)}
+                    >
+                      <span className="addon-box">{selected && <Check size={13} />}</span>
+                      <span>{addon}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="form-group">
-              <label htmlFor="extras">Special Features & Accessories</label>
+              <label htmlFor="extras">Special Requirements / Delivery Location</label>
               <textarea
                 name="extras"
                 id="extras"
                 className="form-control"
-                placeholder="e.g., Playtop, specific perch materials, seed catchers..."
+                placeholder="e.g., Specific door placement, extra perches, delivery city..."
                 value={formData.extras}
                 onChange={handleChange}
-              ></textarea>
+              />
             </div>
 
+            {errorMsg && <p className="form-error">{errorMsg}</p>}
+
             <div className="customizer-buttons">
-              <button 
-                type="button" 
-                className="btn-primary" 
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (!formData.birdType) return alert('Please enter the bird species first!');
-                  const text = `Hi Thiru Cages! I'd like a quote for a custom bird cage.%0A%0A*Bird:* ${formData.birdType}%0A*Size:* ${formData.size}%0A*Finish:* ${formData.color}%0A*Extras:* ${formData.extras || 'None'}`;
-                  window.open(`https://wa.me/919790163209?text=${text}`, '_blank');
-                }}
-              >
-                Send via WhatsApp <Send size={18} />
+              <button type="button" className="btn-primary" onClick={handleWhatsAppQuote}>
+                Get Custom Quote on WhatsApp <Send size={18} />
               </button>
-              
-              <button 
-                type="button" 
-                className="btn-secondary"
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (!formData.birdType) return alert('Please enter the bird species first!');
-                  const body = `Hi Thiru Cages,%0D%0A%0D%0AI would like to book a consultation call to discuss a custom bird cage design.%0D%0A%0D%0AMy Requirements:%0D%0ABird: ${formData.birdType}%0D%0ASize: ${formData.size}%0D%0AFinish: ${formData.color}%0D%0AExtras: ${formData.extras || 'None'}`;
-                  window.location.href = `mailto:consult@thirucages.com?subject=Consultation Call Request&body=${body}`;
-                }}
-              >
-                Book a Call <Bird size={18} />
+
+              <button type="button" className="btn-secondary" onClick={handleEmailQuote}>
+                Send via Email <Mail size={18} />
               </button>
             </div>
           </form>
 
-          <div className="customizer-preview animate-fade-in">
-            <Settings size={48} className="preview-icon" />
-            <h3 style={{ color: 'var(--color-primary)', marginBottom: '1rem', fontSize: '1.5rem' }}>
-              Your Custom Specifications
-            </h3>
-            <ul style={{ textAlign: 'left', width: '100%', maxWidth: '300px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Bird size={20} color="var(--color-secondary)" />
-                <strong>Bird:</strong> {formData.birdType || 'Not specified'}
+          <div className="customizer-preview">
+            <Settings size={44} className="preview-icon" />
+            <h3>Your Custom Build Summary</h3>
+            <p className="preview-subtitle">
+              100% wood-based frame crafted to order in Coimbatore
+            </p>
+
+            <ul className="preview-spec-list">
+              <li>
+                <Bird size={19} className="spec-icon" />
+                <div>
+                  <small>Bird Species</small>
+                  <strong>{formData.birdType || 'Not specified yet'}</strong>
+                </div>
               </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Scaling size={20} color="var(--color-secondary)" />
-                <strong>Size:</strong> <span style={{ textTransform: 'capitalize' }}>{formData.size}</span>
+              <li>
+                <Scaling size={19} className="spec-icon" />
+                <div>
+                  <small>Size &amp; Layout</small>
+                  <strong>{displaySize}</strong>
+                </div>
               </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <PenTool size={20} color="var(--color-secondary)" />
-                <strong>Finish:</strong> <span style={{ textTransform: 'capitalize' }}>{formData.color.replace('-', ' ')}</span>
+              <li>
+                <PenTool size={19} className="spec-icon" />
+                <div>
+                  <small>Wood Finish</small>
+                  <strong>{FINISH_LABELS[formData.color]}</strong>
+                </div>
+              </li>
+              <li>
+                <Layers size={19} className="spec-icon" />
+                <div>
+                  <small>Selected Add-Ons</small>
+                  <strong>
+                    {formData.addons.length > 0 ? formData.addons.join(', ') : 'None selected'}
+                  </strong>
+                </div>
               </li>
             </ul>
-            <p style={{ marginTop: '2rem', color: 'var(--color-text-light)', fontStyle: 'italic' }}>
-              "Every great design begins with an even better story."
+
+            <p className="preview-quote">
+              &ldquo;Built strong, ventilated, and comfortable—just the way your birds need.&rdquo;
             </p>
           </div>
         </div>
